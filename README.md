@@ -41,7 +41,7 @@ At your first ```vagrant up```, the following is automatically installed and con
 
 ## Develop Your Project
 
-The provided public folder is automatically synced to your machine at /var/www/public.  This allows you to work on your project with your favorite code editor locally on your computer.
+The provided public folder is automatically synced to your machine at /var/www.  This allows you to work on your project with your favorite code editor locally on your computer.
 
 Apache will configure itself to point to /var/www/public/public (Laravel structure)
 
