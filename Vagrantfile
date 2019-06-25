@@ -208,12 +208,12 @@ sudo chmod +x /etc/update-motd.d/99-custom-header
 echo -e "\n--- Grabbing a Fresh Copy of Laravel (prefer-dist) ---\n"
 composer create-project --prefer-dist laravel/laravel /var/www/public > /dev/null 2>&1
 
-echo -e "\n--- Correcting Directory and File Permissions for Laravel (storage and cache) ---\n"
-sudo chmod -R ug+rwx /var/www/public/storage /var/www/public/bootstrap/cache
-
 echo -e "\n--- Linking Laravel Storage (public/storage via artisan) ---\n"
 cd /var/www/public
 php artisan storage:link > /dev/null 2>&1
+
+echo -e "\n--- Correcting Directory and File Permissions for Laravel (storage and cache) ---\n"
+sudo chmod -R ug+rwx /var/www/public/storage /var/www/public/bootstrap/cache
 
 cd /var/www/public
 
