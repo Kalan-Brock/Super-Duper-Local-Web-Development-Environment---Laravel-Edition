@@ -40,7 +40,15 @@ Apache will configure itself to point to /var/www/public/public (Laravel structu
 
 You can access your project from either http://192.168.33.10 or https://192.168.33.10.  
 
-Alternatively, you can set your hosts file to point any domain you want to this ip address. 
+Alternatively, you can set your hosts file to point any domain you want to this ip address.
+
+## Back Up Your Project
+
+```vagrant ssh```
+
+```projectbackup```
+
+Enter a backup name at the prompt - your databases and site files will be zipped and placed in /var/www/backups.
 
 ## Connect to MySQL (MariaDB 10.3)
 

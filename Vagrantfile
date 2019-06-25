@@ -173,15 +173,14 @@ cat > /home/vagrant/backup.sh <<- "EOF"
 
 read -p "What name would you like to give this backup?" BACKUP_NAME
 echo "Creating your backup, please wait a moment."
-rm -rf /var/www/backups/${BACKUP_NAME}/
-mkdir -p /var/www/backups/${BACKUP_NAME}/
-tar -czf /var/www/backups/${BACKUP_NAME}/${BACKUP_NAME}.gz /var/www/public/
-echo "Backup $BACKUP_NAME created in /var/www/backups/$BACKUP_NAME."
+mysqldump --all-databases --single-transaction --quick --lock-tables=false > ${BACKUP_NAME}_$(date +%F).sql -u root -proot
+tar -czf /var/www/backups/${BACKUP_NAME}_$(date +%F).gz /var/www/public/
+echo "Backup $BACKUP_NAME created in /var/www/backups/${BACKUP_NAME}_$(date +%F).gz."
 EOF
 
 if ! grep -q "cd /var/www" /home/vagrant/.profile; then
     echo "cd /var/www" >> /home/vagrant/.profile
-    echo -e "\nalias sitebackup='bash /home/vagrant/backup.sh'" >> /home/vagrant/.profile
+    echo -e "\nalias projectbackup='bash /home/vagrant/backup.sh'" >> /home/vagrant/.profile
 fi
 
 sudo touch /etc/update-motd.d/99-custom-header
@@ -191,7 +190,7 @@ cat << "EOF"
 *** Super Duper Local Web Development Environment (Laravel Edition)
 *** https://github.com/Kalan-Brock/Super-Duper-Local-Web-Development-Environment---Laravel-Edition
 -------------------------------------------------------------------------------
-## To Create a Site File Backup: sitebackup
+## To Create a Site File Backup: $ projectbackup
 -------------------------------------------------------------------------------
 Host Name:  | superduperlaravel
 Http:       | http://192.168.33.10
