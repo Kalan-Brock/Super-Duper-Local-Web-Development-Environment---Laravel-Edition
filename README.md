@@ -1,4 +1,4 @@
-# Super Duper Local Web Development Environment - *Laravel Edition*
+# Super Duper Local Web Development Environment
 
 A self provisioning [Vagrant](https://www.vagrantup.com/ "Learn More About Vagrant") box based on Ubuntu 16.04 (ubuntu/xenial64).  No custom boxes, just a ready to go local web development environment you can customize to your heart's content.
 
@@ -29,6 +29,8 @@ At your first ```vagrant up```, the following is automatically installed and con
 * Vim
 * Curl
 * Fresh copy of Laravel
+* Laravel Task Scheduling
+* Laravel Debugbar
 
 ## Develop Your Project
 
@@ -48,7 +50,7 @@ Alternatively, you can set your hosts file to point any domain you want to this 
 
 ```projectbackup```
 
-Enter a backup name at the prompt - your databases and site files will be zipped and placed in /var/www/backups.
+Your databases and site files will be archived and placed in /var/www/backups.
 
 ## Connect to MySQL (MariaDB 10.3)
 

@@ -8,9 +8,8 @@ if ! grep -q "ubuntu-xenial" /etc/hosts; then
 fi
 
 echo -e "\n--- $(tput -T xterm setaf 1)One Super Duper Local Web Development Environment coming right up!$(tput -T xterm sgr0) ---\n"
-
-echo -e "--- Turning on System Time Sync (timedatectl) ---"
 sudo timedatectl set-ntp on > /dev/null 2>&1
+apt-get update > /dev/null 2>&1
 
 echo -e "--- Installing base packages, Vim, Curl, and Git ---"
 apt-get -y install vim curl build-essential python-software-properties git > /dev/null 2>&1
@@ -26,15 +25,15 @@ apt-get -qq update
 
 echo -e "\n--- Installing Apache and PHP  ---"
 apt-get install -y apache2 php7.2 php7.2-bcmath php7.2-bz2 php7.2-cli php7.2-curl php7.2-mysql php7.2-intl php7.2-json php7.2-mbstring php7.2-opcache php7.2-soap php7.2-sqlite3 php7.2-xml php7.2-xsl php7.2-zip libapache2-mod-php7.2 memcached php-memcached > /dev/null 2>&1
-
-echo -e "\n--- Configuring PHP for development environment ---"
+rm -rf /var/www/html/
+echo -e "\n--- Configuring PHP for Development Environment ---"
 echo 'echo "error_reporting = E_ALL" >> /etc/php/7.2/apache2/conf.d/user.ini' | sudo -s
 echo 'echo "display_errors = On" >> /etc/php/7.2/apache2/conf.d/user.ini' | sudo -s
 echo 'echo "upload_max_filesize = 64M" >> /etc/php/7.2/apache2/conf.d/user.ini' | sudo -s
 echo 'echo "post_max_size = 10M" >> /etc/php/7.2/apache2/conf.d/user.ini' | sudo -s
 echo 'echo "max_execution_time = 700" >> /etc/php/7.2/apache2/conf.d/user.ini' | sudo -s
 echo 'echo "always_populate_raw_post_data = -1" >> /etc/php/7.2/apache2/conf.d/user.ini' | sudo -s
-mkdir /var/www/public
+mkdir /var/www/public > /dev/null 2>&1
 
 echo -e "\n--- Configuring Apache for both http and https ---"
 echo "<VirtualHost *:80>
@@ -104,8 +103,6 @@ a2ensite default-ssl > /dev/null 2>&1
 sed -i "s/www-data/vagrant/" /etc/apache2/envvars
 sudo rm -rf /var/www/html/
 service apache2 restart > /dev/null 2>&1
-
-echo -e "\n--- Increasing memcached memory size ---"
 sed -i "s/-m 64/-m 1024/g" /etc/memcached.conf
 service memcached restart
 
@@ -121,6 +118,8 @@ mysql -uroot -proot -e "FLUSH PRIVILEGES" > /dev/null 2>&1
 sed -i 's/^bind-address/#bind-address/' /etc/mysql/my.cnf > /dev/null 2>&1
 sed -i 's/^skip-external-locking/#skip-external-locking/' /etc/mysql/my.cnf > /dev/null 2>&1
 sudo service mysql restart > /dev/null 2>&1
+
+mysql -u root -proot -e "create database super_duper;" > /dev/null 2>&1
 
 echo -e "\n--- Installing Composer ---"
 curl --silent https://getcomposer.org/installer | php > /dev/null 2>&1
@@ -160,7 +159,7 @@ WantedBy=multi-user.target
 sudo systemctl enable mailhog > /dev/null 2>&1
 sudo systemctl start mailhog > /dev/null 2>&1
 
-echo -e "\n--- Updating all the things... ---"
+echo -e "\n--- Updating All The Things... ---"
 sudo apt-get update > /dev/null 2>&1
 sudo apt-get -y upgrade > /dev/null 2>&1
 
@@ -171,11 +170,17 @@ sudo touch /home/vagrant/backup.sh
 cat > /home/vagrant/backup.sh <<- "EOF"
 #!/bin/bash
 
-read -p "What name would you like to give this backup?" BACKUP_NAME
-echo "Creating your backup, please wait a moment."
-mysqldump --all-databases --single-transaction --quick --lock-tables=false > ${BACKUP_NAME}_$(date +%F).sql -u root -proot
-tar -czf /var/www/backups/${BACKUP_NAME}_$(date +%F).gz /var/www/public/
-echo "Backup $BACKUP_NAME created in /var/www/backups/${BACKUP_NAME}_$(date +%F).gz."
+echo "Creating your backup, one moment..."
+mkdir /var/www/backups
+mkdir /var/www/backups/databases
+mkdir /var/www/backups/files
+databases=`mysql --user=root -proot -e "SHOW DATABASES;" | grep -Ev "(Database|information_schema|performance_schema)"`
+
+for db in $databases; do
+  mysqldump --force --opt --user=root -proot --databases $db | gzip > "/var/www/backups/databases/$db_$(date +%F).gz"
+done
+tar -czf /var/www/backups/files/files_$(date +%F).gz /var/www/public/
+echo "Backup of project databases and files created @ /var/www/backups."
 EOF
 
 if ! grep -q "cd /var/www" /home/vagrant/.profile; then
@@ -200,7 +205,7 @@ Redis:      | Port: 6379 (test with redis-cli ping)
 MailHog:    | http://192.168.33.10:8025
 Error Log:  | /var/www/error.log
 Access Log: | /var/www/access.log
-user.ini     | /etc/php/7.2/apache2/conf.d/user.ini
+user.ini    | /etc/php/7.2/apache2/conf.d/user.ini
 
 EOF' >> /etc/update-motd.d/99-custom-header
 sudo chmod +x /etc/update-motd.d/99-custom-header
@@ -215,24 +220,46 @@ php artisan storage:link > /dev/null 2>&1
 echo -e "\n--- Correcting Directory and File Permissions for Laravel (storage and cache) ---\n"
 sudo chmod -R ug+rwx /var/www/public/storage /var/www/public/bootstrap/cache
 
-cd /var/www/public
+composer require imliam/laravel-env-set-command:^1.0.0 > /dev/null 2>&1
+
+php artisan env:set app_debug true > /dev/null 2>&1
+php artisan env:set db_username root > /dev/null 2>&1
+php artisan env:set db_password root > /dev/null 2>&1
+php artisan env:set db_database super_duper > /dev/null 2>&1
+php artisan env:set app_name "Super Duper Web Development Environment" > /dev/null 2>&1
+php artisan env:set app_url http://192.168.33.10 > /dev/null 2>&1
+
+echo -e "\n--- Setting Up Laravel Debugbar ---\n"
+composer require barryvdh/laravel-debugbar --dev > /dev/null 2>&1
+php artisan vendor:publish --provider="Barryvdh\Debugbar\ServiceProvider" > /dev/null 2>&1
+php artisan env:set debugbar_enabled true > /dev/null 2>&1
 
 echo -e "\n\n--- Super Duper!  Visit your box at http://192.168.33.10 or https://192.168.33.10 ---\n\n"
 
 SCRIPT
 
-Vagrant.configure("2") do |config|
-  config.vm.box = 'ubuntu/xenial64'
-  config.vm.network "private_network", ip: "192.168.33.10"
-  config.vm.hostname = "superduperlaravel"
-  config.vm.network "forwarded_port", guest: 3306, host: 3306
-  config.vm.network "forwarded_port", guest: 6379, host: 6379
-  config.vm.network "forwarded_port", guest: 27017, host: 27017
-  config.vm.synced_folder ".", "/var/www", :mount_options => ["dmode=777", "fmode=666"]
-  config.vm.provision 'shell', inline: @script
+@cron = <<SCRIPT
+echo -e "\n--- Setting Cron For Laravel Task Scheduling ---\n"
+touch laravelcron > /dev/null 2>&1
+echo "* * * * * cd /var/www/public && php artisan schedule:run >> /dev/null 2>&1" >> laravelcron
+crontab laravelcron
+rm laravelcron
 
-  config.vm.provider "virtualbox" do |vb|
+SCRIPT
+
+Vagrant.configure("2") do |config|
+    config.vm.box = 'ubuntu/xenial64'
+    config.vm.network "private_network", ip: "192.168.33.10"
+    config.vm.hostname = "superduperlaravel"
+    config.vm.network "forwarded_port", guest: 3306, host: 3306
+    config.vm.network "forwarded_port", guest: 6379, host: 6379
+    config.vm.network "forwarded_port", guest: 27017, host: 27017
+    config.vm.synced_folder ".", "/var/www", :mount_options => ["dmode=777", "fmode=666"]
+    config.vm.provision 'shell', inline: @cron, privileged: false
+    config.vm.provision 'shell', inline: @script
+
+    config.vm.provider "virtualbox" do |vb|
     vb.customize ["modifyvm", :id, "--memory", "2048"]
     vb.customize [ "modifyvm", :id, "--uartmode1", "disconnected" ]
-  end
+    end
 end
