@@ -191,7 +191,7 @@ echo "#!/bin/sh" > /etc/update-motd.d/99-custom-header
 echo '
 cat << "EOF"
 *** Super Duper Local Web Development Environment (Laravel Edition)
-*** https://github.com/Kalan-Brock/Super-Duper-Local-Web-Development-Environment
+*** https://github.com/Kalan-Brock/Super-Duper-Local-Web-Development-Environment---Laravel-Edition
 -------------------------------------------------------------------------------
 ## To Create a Site File Backup: sitebackup
 -------------------------------------------------------------------------------
