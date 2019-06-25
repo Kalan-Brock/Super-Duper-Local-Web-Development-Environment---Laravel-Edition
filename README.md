@@ -1,4 +1,4 @@
-# Super Duper Local Web Development Environment - Laravel Edition
+# Super Duper Local Web Development Environment - *Laravel Edition*
 
 A self provisioning [Vagrant](https://www.vagrantup.com/ "Learn More About Vagrant") box based on Ubuntu 16.04 (ubuntu/xenial64).  No custom boxes, just a ready to go local web development environment you can customize to your heart's content.
 
