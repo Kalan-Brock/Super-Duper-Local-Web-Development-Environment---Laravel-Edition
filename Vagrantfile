@@ -81,8 +81,8 @@ echo '<IfModule mod_ssl.c>
 
               DocumentRoot /var/www/public/public
 
-              ErrorLog ${APACHE_LOG_DIR}/error.log
-              CustomLog ${APACHE_LOG_DIR}/access.log combined
+              ErrorLog /var/www/error.log
+              CustomLog /var/www/access.log combined
 
               SSLEngine on
               SSLCertificateFile      /etc/ssl/certs/apache-selfsigned.crt
