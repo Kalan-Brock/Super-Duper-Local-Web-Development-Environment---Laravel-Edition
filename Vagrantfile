@@ -171,15 +171,15 @@ cat > /home/vagrant/backup.sh <<- "EOF"
 #!/bin/bash
 
 echo "Creating your backup, one moment..."
-mkdir /var/www/backups
-mkdir /var/www/backups/databases
-mkdir /var/www/backups/files
+mkdir /var/www/backups > /dev/null 2>&1
+mkdir /var/www/backups/databases > /dev/null 2>&1
+mkdir /var/www/backups/files > /dev/null 2>&1
 databases=`mysql --user=root -proot -e "SHOW DATABASES;" | grep -Ev "(Database|information_schema|performance_schema)"`
 
 for db in $databases; do
   mysqldump --force --opt --user=root -proot --databases $db | gzip > "/var/www/backups/databases/$db_$(date +%F).gz"
 done
-tar -czf /var/www/backups/files/files_$(date +%F).gz /var/www/public/
+tar -czf /var/www/backups/files/files_$(date +%F).gz /var/www/public/ > /dev/null 2>&1
 echo "Backup of project databases and files created @ /var/www/backups."
 EOF
 
