@@ -193,6 +193,7 @@ cat << "EOF"
 -------------------------------------------------------------------------------
 ## To Create a Site File Backup: sitebackup
 -------------------------------------------------------------------------------
+Host Name:  | superduperlaravel
 Http:       | http://192.168.33.10
 Https:      | https://192.168.33.10
 MySQL:      | Port: 3306  User: root  Password: root (SSH not needed)
@@ -200,7 +201,7 @@ Redis:      | Port: 6379 (test with redis-cli ping)
 MailHog:    | http://192.168.33.10:8025
 Error Log:  | /var/www/error.log
 Access Log: | /var/www/access.log
-php.ini     | /etc/php/7.2/apache2/conf.d/user.ini
+user.ini     | /etc/php/7.2/apache2/conf.d/user.ini
 
 EOF' >> /etc/update-motd.d/99-custom-header
 sudo chmod +x /etc/update-motd.d/99-custom-header
