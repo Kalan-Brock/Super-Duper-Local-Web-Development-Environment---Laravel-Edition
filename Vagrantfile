@@ -49,8 +49,8 @@ echo "<VirtualHost *:80>
         AllowOverride All
     </Directory>
 
-    ErrorLog ${APACHE_LOG_DIR}/error.log
-    CustomLog ${APACHE_LOG_DIR}/access.log combined
+    ErrorLog /var/www/error.log
+    CustomLog /var/www/access.log combined
 </VirtualHost>" > /etc/apache2/sites-available/000-default.conf
 a2enmod rewrite > /dev/null 2>&1
 
@@ -172,12 +172,10 @@ cat > /home/vagrant/backup.sh <<- "EOF"
 #!/bin/bash
 
 read -p "What name would you like to give this backup?" BACKUP_NAME
-cd /var/www/public
 echo "Creating your backup, please wait a moment."
 rm -rf /var/www/backups/${BACKUP_NAME}/
 mkdir -p /var/www/backups/${BACKUP_NAME}/
-tar -czf /var/www/backups/${BACKUP_NAME}/${BACKUP_NAME}.gz .
-cd /var/www
+tar -czf /var/www/backups/${BACKUP_NAME}/${BACKUP_NAME}.gz /var/www/public/
 echo "Backup $BACKUP_NAME created in /var/www/backups/$BACKUP_NAME."
 EOF
 
@@ -200,13 +198,24 @@ Https:      | https://192.168.33.10
 MySQL:      | Port: 3306  User: root  Password: root (SSH not needed)
 Redis:      | Port: 6379 (test with redis-cli ping)
 MailHog:    | http://192.168.33.10:8025
+Error Log:  | /var/www/error.log
+Access Log: | /var/www/access.log
+php.ini     | /etc/php/7.2/apache2/conf.d/user.ini
 
 EOF' >> /etc/update-motd.d/99-custom-header
 sudo chmod +x /etc/update-motd.d/99-custom-header
 
 echo -e "\n--- Grabbing a Fresh Copy of Laravel (prefer-dist) ---\n"
-composer create-project --prefer-dist laravel/laravel /var/www/public
+composer create-project --prefer-dist laravel/laravel /var/www/public > /dev/null 2>&1
+
+echo -e "\n--- Correcting Directory and File Permissions for Laravel (storage and cache) ---\n"
 sudo chmod -R ug+rwx /var/www/public/storage /var/www/public/bootstrap/cache
+
+echo -e "\n--- Linking Laravel Storage (public/storage via artisan) ---\n"
+cd /var/www/public
+php artisan storage:link > /dev/null 2>&1
+
+cd /var/www/public
 
 echo -e "\n\n--- Super Duper!  Visit your box at http://192.168.33.10 or https://192.168.33.10 ---\n\n"
 

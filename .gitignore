@@ -2,3 +2,6 @@
 .idea/
 .vagrant/
 *.sql
+error.log
+access.log
+backups/
