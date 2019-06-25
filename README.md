@@ -29,8 +29,15 @@ At your first ```vagrant up```, the following is automatically installed and con
 * Vim
 * Curl
 * Fresh copy of Laravel
-* Laravel Task Scheduling
 * Laravel Debugbar
+
+## Automatic Configuration
+
+- Default MySQL database created and configured to use right away.
+- Laravel cron task added (Task Scheduling) - https://laravel.com/docs/5.8/scheduling.
+- Laravel Debugbar configuration.
+- Site URL
+- Debug Mode
 
 ## Develop Your Project
 
