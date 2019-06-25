@@ -53,9 +53,9 @@ Alternatively, you can set your hosts file to point any domain you want to this 
 
 ## Back Up Your Project
 
-```vagrant ssh```
+```$ vagrant ssh```
 
-```projectbackup```
+```$ projectbackup```
 
 Your databases and site files will be archived and placed in /var/www/backups.
 
